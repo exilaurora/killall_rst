@@ -1,4 +1,4 @@
-use std::{io::{self, BufRead, Write}, process::Command, env::args};
+use std::{io::{BufRead, BufReader, Write, stdin, stdout}, process::Command, env::args, fs::File};
 
 fn kill_processes(processes_to_kill: Vec<u32>) {
     for pid in processes_to_kill {
@@ -19,7 +19,7 @@ fn main() {
     let auto_confirm = args.iter().any(|arg| arg == "--yes" || arg == "-y");
     let mut processes_to_kill: Vec<u32> = Vec::new();
 
-    for line in io::stdin().lock().lines() {
+    for line in stdin().lock().lines() {
         match line {
             Ok(text) => {
                 let parts: Vec<&str> = text.trim().split_whitespace().collect();
@@ -60,15 +60,15 @@ fn main() {
     else {
         print!("Confirm with 'y' to kill the processes, or any other key to cancel: ");
 
-        io::stdout().flush().expect("Failed to flush stdout");
+        stdout().flush().expect("Failed to flush stdout");
 
         let mut confirmation = String::new();
 
-        if let Ok(mut tty) = std::fs::File::open("/dev/tty") {
-            let mut reader = io::BufReader::new(&mut tty);
+        if let Ok(mut tty) = File::open("/dev/tty") {
+            let mut reader = BufReader::new(&mut tty);
             reader.read_line(&mut confirmation).expect("Failed to read confirmation");
         } else {
-            io::stdin().read_line(&mut confirmation).expect("Failed to read confirmation and open tty");
+            stdin().read_line(&mut confirmation).expect("Failed to read confirmation and open tty");
         }
 
         if confirmation.trim().eq_ignore_ascii_case("y") {
