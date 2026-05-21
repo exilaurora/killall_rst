@@ -1,7 +1,22 @@
-use std::{io::{self, BufRead, Write}, process::Command};
-// use std::process::Command;
+use std::{io::{self, BufRead, Write}, process::Command, env::args};
+
+fn kill_processes(processes_to_kill: Vec<u32>) {
+    for pid in processes_to_kill {
+        let status = Command::new("kill")
+            .arg("-KILL")
+            .arg(pid.to_string())
+            .status();
+
+        match status {
+            Ok(s) if s.success() => println!("Successfully killed process with PID: {}", pid),
+            _ => eprintln!("Error killing process with PID: {}", pid),
+        }
+    }
+}
 
 fn main() {
+    let args = args().collect::<Vec<String>>();
+    let auto_confirm = args.iter().any(|arg| arg == "--yes" || arg == "-y");
     let mut processes_to_kill: Vec<u32> = Vec::new();
 
     for line in io::stdin().lock().lines() {
@@ -37,32 +52,29 @@ fn main() {
     }
 
     println!("Processes to kill: {:?}", processes_to_kill);
-    print!("Confirm with 'y' to kill the processes, or any other key to cancel: ");
 
-    io::stdout().flush().expect("Failed to flush stdout");
-
-    let mut confirmation = String::new();
-
-    if let Ok(mut tty) = std::fs::File::open("/dev/tty") {
-        let mut reader = io::BufReader::new(&mut tty);
-        reader.read_line(&mut confirmation).expect("Failed to read confirmation");
-    } else {
-        io::stdin().read_line(&mut confirmation).expect("Failed to read confirmation and open tty");
+    if auto_confirm {
+        kill_processes(processes_to_kill);
+        return;
     }
+    else {
+        print!("Confirm with 'y' to kill the processes, or any other key to cancel: ");
 
-    if confirmation.trim().eq_ignore_ascii_case("y") {
-        for pid in processes_to_kill {
-            let status = Command::new("kill")
-                .arg("-KILL")
-                .arg(pid.to_string())
-                .status();
+        io::stdout().flush().expect("Failed to flush stdout");
 
-            match status {
-                Ok(s) if s.success() => println!("Successfully killed process with PID: {}", pid),
-                _ => eprintln!("Error killing process with PID: {}", pid),
-            }
+        let mut confirmation = String::new();
+
+        if let Ok(mut tty) = std::fs::File::open("/dev/tty") {
+            let mut reader = io::BufReader::new(&mut tty);
+            reader.read_line(&mut confirmation).expect("Failed to read confirmation");
+        } else {
+            io::stdin().read_line(&mut confirmation).expect("Failed to read confirmation and open tty");
         }
-    } else {
-        println!("Process killing cancelled.");
+
+        if confirmation.trim().eq_ignore_ascii_case("y") {
+            kill_processes(processes_to_kill);
+        } else {
+            println!("Process killing cancelled.");
+        }
     }
 }
