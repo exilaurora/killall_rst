@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "learn_rst"
+name = "killall"
 version = "0.1.0"
