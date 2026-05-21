@@ -1,11 +1,11 @@
-# killall
+# killall\_rst
 
 Небольшая утилита для завершения процессов по имени. Читает имена процессов из стандартного ввода и завершает соответствующие процессы.
 
 Пример использования:
 
 ```
-$ ps -ax | grep AyuGram | killall
+$ ps -ax | grep AyuGram | killall_rst
 ```
 
 Сборка (компиляция в release-режиме):
@@ -14,16 +14,16 @@ $ ps -ax | grep AyuGram | killall
 $ cargo build --release
 ```
 
-Собранный бинарник будет доступен в `target/release/killall`.
+Собранный бинарник будет доступен в `target/release/killall_rst`.
 
 Пример запуска готового бинарника:
 
 ```
-$ ./target/release/killall
+$ ./target/release/killall_rst
 ```
 
 При необходимости можно установить бинарник в систему, например:
 
 ```
-$ sudo cp target/release/killall /usr/local/bin/
+$ sudo cp target/release/killall_rst /usr/local/bin/
 ```
